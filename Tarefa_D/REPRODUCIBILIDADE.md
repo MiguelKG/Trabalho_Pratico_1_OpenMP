@@ -86,3 +86,5 @@ manualmente com:
 gcc tarefa_d.c -o tarefa_d -fopenmp -lm
 ./tarefa_d
 python3 grafico_d.py
+
+Obs: certas informações da execução são somente exibidas na saída do script "tarefa_d", enquanto os gráficos dão maior enfoque nos dados mais relevantas.

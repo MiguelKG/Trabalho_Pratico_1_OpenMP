@@ -1,0 +1,36 @@
+# Makefile para a Tarefa C (SAXPY)
+# Atualizado para incluir análise crítica
+
+CC = gcc
+CFLAGS = -std=c11 -O3 -Wall -fopenmp
+LDFLAGS = -lm -fopenmp
+EXE = tarefaC
+SRC = tarefaC.c
+
+# Alvo padrão (apenas compila)
+all: omp
+
+# Alvo 'omp' (Compilação principal)
+omp: $(SRC)
+	$(CC) $(CFLAGS) $(SRC) -o $(EXE) $(LDFLAGS)
+
+# Alvo 'run' (Executa o script de testes)
+# Nota: O seu run.sh já faz a compilação internamente, 
+# mas mantemos a dependência 'omp' aqui por boas práticas.
+run: omp
+	chmod +x run.sh
+	./run.sh
+
+# Alvo 'plot' (Gera TODOS os gráficos)
+# Agora executa tanto o plot básico quanto o crítico
+plot:
+	@echo "Gerando gráficos básicos..."
+	python3 plot.py
+	@echo "Gerando gráficos de análise crítica..."
+	python3 plot_critico.py
+
+# Limpeza
+clean:
+	rm -f $(EXE) *.o *.csv
+	rm -rf graficos/
+	rm -rf graficos_criticos/

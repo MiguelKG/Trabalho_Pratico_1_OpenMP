@@ -1,112 +1,113 @@
-Reprodutibilidade e Ambiente de Testes
+# Reprodutibilidade e Ambiente de Testes
 
-Este documento descreve o hardware, software e configurações utilizados para obter os resultados aqui apresentados.
+Execução da Tarefa C pelo aluno Gustavo Reginatto de IPPD
 
-1. Caracterização do Hardware
+## 1. Hardware
 
-Os experimentos foram executados em uma máquina pessoal com as seguintes especificações (baseadas no host):
+-   **Processador (CPU):** Intel(R) Core(TM) i7-5500U @ 2.40GHz
+-   **Arquitetura:** x86_64
+-   **Núcleos Físicos:** 2
+-   **Threads (Lógicos):** 4 (Hyper-Threading habilitado)
+-   **Memória RAM:** 8 GB (DDR3/DDR4)
+-   **Sistema Operacional:** Windows 10 (64 bits)
+-   **Ambiente de Execução:** Windows Subsystem for Linux (WSL)
 
-Processador (CPU): Intel(R) Core(TM) i7-5500U CPU @ 2.40GHz
+## 2. Software
 
-Arquitetura: x86_64
+### Compilador C
 
-Frequência Base: 2.40 GHz
+-   **GCC:** versão 9.4.0
+-   **Suporte a OpenMP:** OpenMP 4.5
 
-Núcleos Físicos: 2
+**Flags de compilação:**
 
-Threads (Lógicos): 4 (Hyper-Threading habilitado)
+    -std=c11 -O3 -Wall -fopenmp
 
-Memória RAM: 8.00 GB (DDR3/DDR4)
+**Flags de ligação:**
 
-Sistema Operacional (Host): Windows 10/11 (64 bits)
+    -lm -fopenmp
 
-Ambiente de Execução: Subsistema Windows para Linux (WSL) / Linux Nativo
+### Ferramentas de Análise
 
-Nota: O código foi compilado e executado em ambiente Linux conforme exigido.
+-   **Python 3**
+-   Bibliotecas utilizadas:
+    -   pandas
+    -   matplotlib
+    -   seaborn
+    -   numpy
 
-2. Caracterização do Software
+## 3. Metodologia de Execução
 
-Compilador e Bibliotecas
+### Compilação
 
-Compilador C: GCC (GNU Compiler Collection)
+O projeto utiliza compilação direta via GCC com otimização nível 3
+(`-O3`).
 
-Versão: 9.4
+### Parâmetros dos Testes
 
-Suporte OpenMP: OpenMP 4.5 ou superior (Flags -fopenmp)
+Os testes são automatizados pelo script `run.sh`, cobrindo:
 
-Flags de Compilação:
+-   **Tamanhos do vetor (N):**
+    -   100.000
+    -   500.000
+    -   1.000.000
+    -   10.000.000
+-   **Número de threads (OpenMP):**
+    -   1, 2, 4, 8, 16
+-   **Repetições por configuração:** 5
+-   **Métrica de avaliação:** tempo de execução em segundos 
 
--std=c11 -O3 -Wall -fopenmp
+### Coleta de Dados
 
+Os resultados são armazenados no arquivo `results_tarefaC.csv`,
+contendo:
 
-Flags de Ligação (Linker):
+  Campo                 Descrição
+  --------------------- -----------------------------
+  Execução              1 a 5
+  Versão do algoritmo   (1=Seq, 2=SIMD, 3=Par+SIMD)
+  Tamanho N             Tamanho do vetor
+  Threads               Número de threads usadas
+  Tempo                 Tempo de execução
+  Checksum              Verificação da saída
 
--lm -fopenmp
+## 4. Como Reproduzir os Resultados
 
+### 1. Limpar artefatos anteriores (opcional)
 
-Ferramentas de Análise
+    make clean
 
-Python: Versão 3.x
+Ou manualmente:
 
-Bibliotecas: pandas, matplotlib, seaborn (utilizadas para geração dos gráficos).
+    rm tarefaC
+    rm results_tarefaC.csv
+    rm -rf graficos/ graficos_criticos/
 
-3. Metodologia de Execução
+### 2. Compilar e executar todos os testes
 
-Compilação
+    ./run.sh
 
-O projeto utiliza um Makefile para garantir a compilação consistente com otimizações de nível 3 (-O3).
-Comando utilizado:
+**Comando interno utilizado pelo script:**
 
-make omp
+    gcc -std=c11 -O3 -Wall -fopenmp tarefaC.c -o tarefaC -lm
 
+### 3. Gerar gráficos de análise básica
 
-Parâmetros dos Testes
+    python3 plot.py
 
-Os testes foram automatizados pelo script run.sh, cobrindo o seguinte espaço de parâmetros:
+### 4. Gerar gráficos de análise de vazão e eficiência
 
-Tamanhos de Vetor (N): 100.000, 500.000, 1.000.000, 10.000.000
-
-Número de Threads (OpenMP): 1, 2, 4, 8, 16
-
-Repetições: Cada configuração foi executada 5 vezes.
-
-Métrica: Tempo de execução do kernel (excluindo alocação e inicialização), reportado em segundos.
-
-Coleta de Dados
-
-Os dados brutos foram salvos automaticamente em formato CSV (results_tarefaC.csv) contendo:
-
-Número da execução (1 a 5)
-
-Versão do algoritmo (1=Seq, 2=SIMD, 3=Par+SIMD)
-
-Tamanho N
-
-Número de Threads
-
-Tempo de execução
-
-Checksum (para validação de corretude)
-
-4. Como Reproduzir os Resultados
-
-Para reproduzir exatamente os mesmos testes neste ambiente:
-
-Limpe os artefatos anteriores:
-
-make clean
-
-
-Compile o código:
-
-make omp
+    python3 plot2.py
 
 
-Execute a bateria de testes:
+### 5. Conclusão
 
-./run.sh
+1. Sobre a Vetorização (SIMD): Basicamente, não mudou quase nada. Por quê? O seu compilador com a flag -O3 é inteligente. Ele percebeu sozinho que dava para otimizar a conta e já fez isso na versão normalmente.
 
+2. Sobre a Velocidade com mais Threads: Muitas threads não foram necessárias para otimizar o problema visto que apenas uma daria conta do fluxo de entrada dos dados.
 
-Gere os gráficos de análise:
+3. Sobre a Memória (Vazão): Os testes mostraram que a memória RAM tem um limite de velocidade real de 16 GB por segundo. O que isso significa? É o limite físico do seu notebook. Não importa o código os dados não conseguem trafegar entre a memória e o processador mais rápido que isso.
 
-python3 plot.py
+4. Sobre a Eficiência Com 16 threads: A eficiência foi de apenas 5%. Como a entrada de dados não era rapida o suficiente, muitas threads acabam ficando ociosas e apenas gastando recursos.
+
+5. Quando usar muitas threads atrapalhou (Overhead): Em testes pequenos criar muitas threads demorava mais do que receber os proprios dados.
